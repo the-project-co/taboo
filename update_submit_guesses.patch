@@ -1,0 +1,38 @@
+--- taboo_backend/src/main/java/com/project/taboo/service/GameManager.java
++++ taboo_backend/src/main/java/com/project/taboo/service/GameManager.java
+@@ -151,14 +151,25 @@
+             return;
+         }
+
++        List<GuessResult> guessResults = new ArrayList<>();
+         String[] guessList = guesses.split(",");
+         int points = 0;
+         for (String guess : guessList) {
+             String trimmedGuess = guess.trim().toLowerCase();
++            GuessStatus status = GuessStatus.WRONG;
++
+             for (String target : room.getCurrentWords()) {
+                 double score = calculateSimilarity(trimmedGuess, target.toLowerCase());
+-                if (score == 1.0) points += 2;
+-                else if (score >= 0.75) points += 1;
++                if (score == 1.0) {
++                    points += 2;
++                    status = GuessStatus.CORRECT;
++                    break; // Exact match, stop checking other words for this guess
++                } else if (score >= 0.75) {
++                    points += 1;
++                    status = GuessStatus.PARTIAL;
++                }
+             }
++
++            guessResults.add(new GuessResult(playerId, player.get().getName(), guess.trim(), status));
+         }
+
+         if (room.getCurrentTurnTeam() == Team.A) room.setScoreA(room.getScoreA() + points);
+@@ -169,6 +180,7 @@
+             room.setTurnActive(false);
+         }
+
++        messagingTemplate.convertAndSend("/topic/guesses/" + roomCode, guessResults);
+         broadcastRoomUpdate(roomCode);
+     }

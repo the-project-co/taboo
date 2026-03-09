@@ -26,7 +26,7 @@ public class GameManager {
                 .build();
 
         GameRoom room = GameRoom.builder()
-                .roomCode(roomCode) 
+                .roomCode(roomCode)
                 .state(GameState.LOBBY)
                 .players(new CopyOnWriteArrayList<>(List.of(host)))
                 .genre(Genre.ANY)
@@ -151,26 +151,15 @@ public class GameManager {
             return;
         }
 
-        List<GuessResult> guessResults = new ArrayList<>();
         String[] guessList = guesses.split(",");
         int points = 0;
         for (String guess : guessList) {
             String trimmedGuess = guess.trim().toLowerCase();
-            GuessStatus status = GuessStatus.WRONG;
-
             for (String target : room.getCurrentWords()) {
                 double score = calculateSimilarity(trimmedGuess, target.toLowerCase());
-                if (score == 1.0) {
-                    points += 2;
-                    status = GuessStatus.CORRECT;
-                    break; // Exact match, stop checking other words for this guess
-                } else if (score >= 0.75) {
-                    points += 1;
-                    status = GuessStatus.PARTIAL;
-                }
+                if (score == 1.0) points += 2;
+                else if (score >= 0.75) points += 1;
             }
-
-            guessResults.add(new GuessResult(playerId, player.get().getName(), guess.trim(), status));
         }
 
         if (room.getCurrentTurnTeam() == Team.A) room.setScoreA(room.getScoreA() + points);
@@ -181,7 +170,6 @@ public class GameManager {
             room.setTurnActive(false);
         }
 
-        messagingTemplate.convertAndSend("/topic/guesses/" + roomCode, guessResults);
         broadcastRoomUpdate(roomCode);
     }
 
