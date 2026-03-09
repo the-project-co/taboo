@@ -5,6 +5,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
+import org.springframework.web.util.HtmlUtils;
+
 import java.util.*;
 import java.util.concurrent.*;
 
@@ -17,10 +19,12 @@ public class GameManager {
     private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(4);
 
     public GameRoom createRoom(String hostName, String hostId) {
+        String safeHostName = hostName != null ? HtmlUtils.htmlEscape(hostName) : "Unknown";
+        String safeHostId = hostId != null ? HtmlUtils.htmlEscape(hostId) : UUID.randomUUID().toString();
         String roomCode = generateRoomCode();
         Player host = Player.builder()
-                .id(hostId)
-                .name(hostName)
+                .id(safeHostId)
+                .name(safeHostName)
                 .team(Team.UNASSIGNED)
                 .isHost(true)
                 .build();
@@ -41,9 +45,12 @@ public class GameManager {
         if (room == null) throw new RuntimeException("Room not found");
         if (room.getState() != GameState.LOBBY) throw new RuntimeException("Game already started");
 
+        String safePlayerName = playerName != null ? HtmlUtils.htmlEscape(playerName) : "Unknown";
+        String safePlayerId = playerId != null ? HtmlUtils.htmlEscape(playerId) : UUID.randomUUID().toString();
+
         Player player = Player.builder()
-                .id(playerId)
-                .name(playerName)
+                .id(safePlayerId)
+                .name(safePlayerName)
                 .team(Team.UNASSIGNED)
                 .isHost(false)
                 .build();
@@ -144,6 +151,7 @@ public class GameManager {
     public void submitGuesses(String roomCode, String playerId, String guesses) {
         GameRoom room = rooms.get(roomCode);
         if (room == null || !room.isTurnActive()) return;
+        if (guesses != null && guesses.length() > 500) return; // Prevent DoS from massive inputs
 
         // Check if player is on the active team but NOT the clue giver
         Optional<Player> player = room.getPlayers().stream().filter(p -> p.getId().equals(playerId)).findFirst();
@@ -151,7 +159,7 @@ public class GameManager {
             return;
         }
 
-        String[] guessList = guesses.split(",");
+        String[] guessList = (guesses == null ? "" : guesses).split(",");
         int points = 0;
         for (String guess : guessList) {
             String trimmedGuess = guess.trim().toLowerCase();
