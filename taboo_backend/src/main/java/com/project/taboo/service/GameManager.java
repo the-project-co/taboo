@@ -17,6 +17,11 @@ public class GameManager {
     private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(4);
 
     public GameRoom createRoom(String hostName, String hostId) {
+        if (hostName == null || hostName.trim().isEmpty()) hostName = "Unknown";
+        if (hostName.length() > 50) hostName = hostName.substring(0, 50);
+        // Sanitize to prevent XSS
+        hostName = org.springframework.web.util.HtmlUtils.htmlEscape(hostName);
+
         String roomCode = generateRoomCode();
         Player host = Player.builder()
                 .id(hostId)
@@ -40,6 +45,11 @@ public class GameManager {
         GameRoom room = rooms.get(roomCode);
         if (room == null) throw new RuntimeException("Room not found");
         if (room.getState() != GameState.LOBBY) throw new RuntimeException("Game already started");
+
+        if (playerName == null || playerName.trim().isEmpty()) playerName = "Unknown";
+        if (playerName.length() > 50) playerName = playerName.substring(0, 50);
+        // Sanitize to prevent XSS
+        playerName = org.springframework.web.util.HtmlUtils.htmlEscape(playerName);
 
         Player player = Player.builder()
                 .id(playerId)
@@ -142,6 +152,9 @@ public class GameManager {
     }
 
     public void submitGuesses(String roomCode, String playerId, String guesses) {
+        // Prevent DoS from overly large payload string
+        if (guesses == null || guesses.length() > 500) return;
+
         GameRoom room = rooms.get(roomCode);
         if (room == null || !room.isTurnActive()) return;
 
