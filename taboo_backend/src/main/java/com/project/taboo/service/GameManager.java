@@ -17,10 +17,14 @@ public class GameManager {
     private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(4);
 
     public GameRoom createRoom(String hostName, String hostId) {
+        // SECURITY: Sanitize user input to prevent Stored XSS via WebSocket broadcasts
+        String safeHostName = org.springframework.web.util.HtmlUtils.htmlEscape(hostName);
+        String safeHostId = org.springframework.web.util.HtmlUtils.htmlEscape(hostId);
+
         String roomCode = generateRoomCode();
         Player host = Player.builder()
-                .id(hostId)
-                .name(hostName)
+                .id(safeHostId)
+                .name(safeHostName)
                 .team(Team.UNASSIGNED)
                 .isHost(true)
                 .build();
@@ -41,9 +45,13 @@ public class GameManager {
         if (room == null) throw new RuntimeException("Room not found");
         if (room.getState() != GameState.LOBBY) throw new RuntimeException("Game already started");
 
+        // SECURITY: Sanitize user input to prevent Stored XSS via WebSocket broadcasts
+        String safePlayerName = org.springframework.web.util.HtmlUtils.htmlEscape(playerName);
+        String safePlayerId = org.springframework.web.util.HtmlUtils.htmlEscape(playerId);
+
         Player player = Player.builder()
-                .id(playerId)
-                .name(playerName)
+                .id(safePlayerId)
+                .name(safePlayerName)
                 .team(Team.UNASSIGNED)
                 .isHost(false)
                 .build();
