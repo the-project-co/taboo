@@ -1,0 +1,4 @@
+## 2024-05-02 - Stored XSS in WebSocket Broadcasts
+**Vulnerability:** Unsanitized player names were stored directly into the `GameRoom` concurrent map. Since this in-memory state is directly broadcasted to all connected clients via WebSockets when updates happen, a malicious user could submit a name containing script tags, executing JavaScript in other clients' browsers.
+**Learning:** Even though this application doesn't have a traditional database, the backend's shared in-memory state acts identically as a storage medium for XSS payloads when that state is broadcasted over real-time connections to multiple users.
+**Prevention:** Always sanitize any user-provided string fields (like names, chat messages, etc.) using reliable escaping mechanisms like `org.springframework.web.util.HtmlUtils.htmlEscape()` before adding them to shared state that gets pushed to clients.
