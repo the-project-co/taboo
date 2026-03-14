@@ -4,6 +4,7 @@ import com.project.taboo.model.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.web.util.HtmlUtils;
 
 import java.util.*;
 import java.util.concurrent.*;
@@ -17,10 +18,15 @@ public class GameManager {
     private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(4);
 
     public GameRoom createRoom(String hostName, String hostId) {
+        // Sanitize inputs to prevent XSS when broadcast via WebSockets
+        // We use HtmlUtils.htmlEscape() as per memory instructions to prevent Stored XSS vulnerabilities
+        String sanitizedHostName = HtmlUtils.htmlEscape(hostName != null ? hostName : "");
+        String sanitizedHostId = HtmlUtils.htmlEscape(hostId != null ? hostId : "");
+
         String roomCode = generateRoomCode();
         Player host = Player.builder()
-                .id(hostId)
-                .name(hostName)
+                .id(sanitizedHostId)
+                .name(sanitizedHostName)
                 .team(Team.UNASSIGNED)
                 .isHost(true)
                 .build();
@@ -37,13 +43,18 @@ public class GameManager {
     }
 
     public GameRoom joinRoom(String roomCode, String playerName, String playerId) {
+        // Sanitize inputs to prevent XSS when broadcast via WebSockets
+        // We use HtmlUtils.htmlEscape() as per memory instructions to prevent Stored XSS vulnerabilities
+        String sanitizedPlayerName = HtmlUtils.htmlEscape(playerName != null ? playerName : "");
+        String sanitizedPlayerId = HtmlUtils.htmlEscape(playerId != null ? playerId : "");
+
         GameRoom room = rooms.get(roomCode);
         if (room == null) throw new RuntimeException("Room not found");
         if (room.getState() != GameState.LOBBY) throw new RuntimeException("Game already started");
 
         Player player = Player.builder()
-                .id(playerId)
-                .name(playerName)
+                .id(sanitizedPlayerId)
+                .name(sanitizedPlayerName)
                 .team(Team.UNASSIGNED)
                 .isHost(false)
                 .build();
