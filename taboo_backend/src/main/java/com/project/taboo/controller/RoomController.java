@@ -1,8 +1,9 @@
 package com.project.taboo.controller;
 
 import com.project.taboo.model.GameRoom;
-import com.project.taboo.service.GameManager;
+import com.project.taboo.service.RoomService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
@@ -12,15 +13,18 @@ import java.util.Map;
 @RequiredArgsConstructor
 @CrossOrigin(origins = "*")
 public class RoomController {
-    private final GameManager gameManager;
 
-    @PostMapping("/create")
-    public GameRoom createRoom(@RequestBody Map<String, String> payload) {
-        return gameManager.createRoom(payload.get("name"), payload.get("id"));
+    private final RoomService roomService;
+
+    @PostMapping
+    public ResponseEntity<GameRoom> createRoom(@RequestBody Map<String, String> request) {
+        String hostName = request.getOrDefault("hostName", "Host");
+        GameRoom room = roomService.createRoom(hostName);
+        return ResponseEntity.ok(room);
     }
 
-    @PostMapping("/join/{roomCode}")
-    public GameRoom joinRoom(@PathVariable String roomCode, @RequestBody Map<String, String> payload) {
-        return gameManager.joinRoom(roomCode, payload.get("name"), payload.get("id"));
+    @GetMapping("/{roomId}")
+    public ResponseEntity<GameRoom> getRoom(@PathVariable String roomId) {
+        return ResponseEntity.ok(roomService.getRoom(roomId));
     }
 }
