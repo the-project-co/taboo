@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.*;
 import java.util.concurrent.*;
+import org.springframework.web.util.HtmlUtils;
 
 @Service
 @RequiredArgsConstructor
@@ -17,10 +18,14 @@ public class GameManager {
     private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(4);
 
     public GameRoom createRoom(String hostName, String hostId) {
+        // Sanitize input to prevent Stored XSS in WebSocket broadcasts
+        String safeHostName = HtmlUtils.htmlEscape(hostName);
+        String safeHostId = HtmlUtils.htmlEscape(hostId);
+
         String roomCode = generateRoomCode();
         Player host = Player.builder()
-                .id(hostId)
-                .name(hostName)
+                .id(safeHostId)
+                .name(safeHostName)
                 .team(Team.UNASSIGNED)
                 .isHost(true)
                 .build();
@@ -41,9 +46,13 @@ public class GameManager {
         if (room == null) throw new RuntimeException("Room not found");
         if (room.getState() != GameState.LOBBY) throw new RuntimeException("Game already started");
 
+        // Sanitize input to prevent Stored XSS in WebSocket broadcasts
+        String safePlayerName = HtmlUtils.htmlEscape(playerName);
+        String safePlayerId = HtmlUtils.htmlEscape(playerId);
+
         Player player = Player.builder()
-                .id(playerId)
-                .name(playerName)
+                .id(safePlayerId)
+                .name(safePlayerName)
                 .team(Team.UNASSIGNED)
                 .isHost(false)
                 .build();
