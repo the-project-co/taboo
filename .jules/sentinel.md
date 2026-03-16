@@ -1,0 +1,4 @@
+## 2024-05-24 - [Stored XSS in WebSockets]
+**Vulnerability:** User inputs (playerName and hostName) were being saved to in-memory state (GameRoom) and broadcasted via WebSockets to all connected clients without any sanitization. This allowed Stored XSS where a malicious name could execute scripts in other users' browsers.
+**Learning:** Real-time applications using WebSockets and in-memory state are highly susceptible to Stored XSS if data is directly reflected without sanitization, as the typical request-response cycle sanitization (e.g., in REST controllers) might be bypassed or insufficient when the data is directly passed to the messaging template.
+**Prevention:** Always sanitize any user-provided data before storing it in shared state or broadcasting it over WebSockets. In Spring, `org.springframework.web.util.HtmlUtils.htmlEscape()` can be used to neutralize HTML content.

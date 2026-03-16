@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.*;
 import java.util.concurrent.*;
+import org.springframework.web.util.HtmlUtils;
 
 @Service
 @RequiredArgsConstructor
@@ -20,7 +21,8 @@ public class GameManager {
         String roomCode = generateRoomCode();
         Player host = Player.builder()
                 .id(hostId)
-                .name(hostName)
+                // 🛡️ Sentinel: Sanitize hostName to prevent Stored XSS via WebSocket broadcasts
+                .name(HtmlUtils.htmlEscape(hostName))
                 .team(Team.UNASSIGNED)
                 .isHost(true)
                 .build();
@@ -43,7 +45,8 @@ public class GameManager {
 
         Player player = Player.builder()
                 .id(playerId)
-                .name(playerName)
+                // 🛡️ Sentinel: Sanitize playerName to prevent Stored XSS via WebSocket broadcasts
+                .name(HtmlUtils.htmlEscape(playerName))
                 .team(Team.UNASSIGNED)
                 .isHost(false)
                 .build();
