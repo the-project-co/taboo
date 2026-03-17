@@ -1,0 +1,4 @@
+## 2024-05-24 - Stored XSS via WebSocket Broadcasts in In-Memory State
+**Vulnerability:** User inputs (e.g., player names) are stored in shared in-memory state (`GameRoom`) and broadcasted directly to clients via WebSockets without sanitization, leading to Stored XSS.
+**Learning:** Even though React handles XSS defensively on the frontend, backend services utilizing WebSockets for real-time state synchronization must not trust client inputs. Unsanitized data held in memory structures (like ConcurrentHashMap) acts as a vector for Stored XSS across all connected clients in a room.
+**Prevention:** Always sanitize user inputs at the boundary or service layer before storing them in shared memory. Use `org.springframework.web.util.HtmlUtils.htmlEscape()` for any user-provided string (like names and IDs) that will be broadcasted.
