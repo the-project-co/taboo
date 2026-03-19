@@ -1,5 +1,7 @@
 package com.project.taboo.model;
 
 public enum Team {
-    A, B, UNASSIGNED
+    TEAM_A,
+    TEAM_B,
+    UNASSIGNED
 }
