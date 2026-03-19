@@ -1,0 +1,4 @@
+## 2023-10-27 - [Stored XSS via Unsanitized WebSocket Broadcasts]
+**Vulnerability:** User-controlled strings (like `hostName` and `playerName`) were accepted via WebSocket messages and stored in the backend's in-memory state (`GameRoom`), then subsequently broadcast back to all connected clients without any HTML sanitization.
+**Learning:** Even though WebSockets deal with messages rather than HTTP responses, any untrusted user input that is eventually rendered in a browser must be properly sanitized. Storing it in memory and broadcasting it can lead to Stored XSS where the malicious payload is executed on the frontend when the updated game state is rendered.
+**Prevention:** Always sanitize user input as early as possible on the backend before it enters the application state. Use utilities like `org.springframework.web.util.HtmlUtils.htmlEscape()` to neutralize HTML characters when storing data that will be broadcast back to clients and rendered in the UI.
