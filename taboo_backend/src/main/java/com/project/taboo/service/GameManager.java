@@ -4,6 +4,7 @@ import com.project.taboo.model.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.web.util.HtmlUtils;
 
 import java.util.*;
 import java.util.concurrent.*;
@@ -17,10 +18,14 @@ public class GameManager {
     private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(4);
 
     public GameRoom createRoom(String hostName, String hostId) {
+        // Sentinel Security Fix: Sanitize user input to prevent Stored XSS via WebSocket broadcasting
+        String safeHostName = hostName != null ? HtmlUtils.htmlEscape(hostName) : null;
+        String safeHostId = hostId != null ? HtmlUtils.htmlEscape(hostId) : null;
+
         String roomCode = generateRoomCode();
         Player host = Player.builder()
-                .id(hostId)
-                .name(hostName)
+                .id(safeHostId)
+                .name(safeHostName)
                 .team(Team.UNASSIGNED)
                 .isHost(true)
                 .build();
@@ -37,13 +42,17 @@ public class GameManager {
     }
 
     public GameRoom joinRoom(String roomCode, String playerName, String playerId) {
+        // Sentinel Security Fix: Sanitize user input to prevent Stored XSS via WebSocket broadcasting
+        String safePlayerName = playerName != null ? HtmlUtils.htmlEscape(playerName) : null;
+        String safePlayerId = playerId != null ? HtmlUtils.htmlEscape(playerId) : null;
+
         GameRoom room = rooms.get(roomCode);
         if (room == null) throw new RuntimeException("Room not found");
         if (room.getState() != GameState.LOBBY) throw new RuntimeException("Game already started");
 
         Player player = Player.builder()
-                .id(playerId)
-                .name(playerName)
+                .id(safePlayerId)
+                .name(safePlayerName)
                 .team(Team.UNASSIGNED)
                 .isHost(false)
                 .build();
