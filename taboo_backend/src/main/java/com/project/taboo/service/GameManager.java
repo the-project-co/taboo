@@ -4,6 +4,7 @@ import com.project.taboo.model.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.web.util.HtmlUtils;
 
 import java.util.*;
 import java.util.concurrent.*;
@@ -19,8 +20,8 @@ public class GameManager {
     public GameRoom createRoom(String hostName, String hostId) {
         String roomCode = generateRoomCode();
         Player host = Player.builder()
-                .id(hostId)
-                .name(hostName)
+                .id(HtmlUtils.htmlEscape(hostId))
+                .name(HtmlUtils.htmlEscape(hostName))
                 .team(Team.UNASSIGNED)
                 .isHost(true)
                 .build();
@@ -42,8 +43,8 @@ public class GameManager {
         if (room.getState() != GameState.LOBBY) throw new RuntimeException("Game already started");
 
         Player player = Player.builder()
-                .id(playerId)
-                .name(playerName)
+                .id(HtmlUtils.htmlEscape(playerId))
+                .name(HtmlUtils.htmlEscape(playerName))
                 .team(Team.UNASSIGNED)
                 .isHost(false)
                 .build();
