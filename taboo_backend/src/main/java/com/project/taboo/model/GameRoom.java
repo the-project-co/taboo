@@ -1,31 +1,34 @@
 package com.project.taboo.model;
 
-import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.atomic.AtomicInteger;
 
 @Data
 @Builder
-@NoArgsConstructor
-@AllArgsConstructor
 public class GameRoom {
-    private String roomCode;
+    private String id;
+    private RoomState state;
+    private final List<Player> players = new CopyOnWriteArrayList<>();
+
     @Builder.Default
-    private List<Player> players = new CopyOnWriteArrayList<>();
-    private GameState state;
-    private Team currentTurnTeam;
+    private final AtomicInteger teamAScore = new AtomicInteger(0);
+
+    @Builder.Default
+    private final AtomicInteger teamBScore = new AtomicInteger(0);
+
+    @Builder.Default
+    private Team currentTurn = Team.TEAM_A;
+
     private String currentClueGiverId;
+
     @Builder.Default
-    private Genre genre = Genre.ANY;
-    private int scoreA;
-    private int scoreB;
-    private int timer;
+    private int timeRemaining = 30;
+
     @Builder.Default
     private List<String> currentWords = new ArrayList<>();
-    private boolean turnActive;
 }

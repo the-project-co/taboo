@@ -1,0 +1,3 @@
+## 2024-03-19 - Semantic Forms for Better Keyboard UX
+**Learning:** Using generic `div` wrappers with custom `onKeyDown` handlers for input forms breaks native browser accessibility features and mobile keyboard behaviors. Specifically, mobile users expect the "Go" or "Enter" button on their device keyboard to submit the form. Without a proper `<form>` element, these interactions are lost, causing frustration.
+**Action:** Always wrap inputs in a `<form>` element instead of relying on custom key handlers for the "Enter" key. This ensures both accessibility features and native behaviors (like form submission via the "Go" keyboard button) work seamlessly. Add `type="submit"` to the submit button and prevent default behavior on form submission.
