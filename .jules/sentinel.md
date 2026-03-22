@@ -1,0 +1,4 @@
+## 2024-05-20 - Stored XSS via WebSocket Broadcasts
+**Vulnerability:** User-provided inputs (player name and ID) were added to the shared game state (`GameRoom` object) without sanitization in `GameManager.java`. This object is directly broadcast to all clients via WebSockets (`messagingTemplate.convertAndSend`). If an attacker provided a malicious script payload as their name, it would be executed by other clients when the state was rendered in the React frontend.
+**Learning:** In real-time applications using WebSockets, any shared state updated by users and broadcast to others is a prime vector for Stored XSS. The backend must sanitize these inputs before they enter the shared state.
+**Prevention:** Use Spring's `HtmlUtils.htmlEscape()` on all string inputs from users before storing them in in-memory state objects that will be broadcast.

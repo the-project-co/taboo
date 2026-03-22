@@ -4,6 +4,7 @@ import com.project.taboo.model.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.web.util.HtmlUtils;
 
 import java.util.*;
 import java.util.concurrent.*;
@@ -17,10 +18,14 @@ public class GameManager {
     private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(4);
 
     public GameRoom createRoom(String hostName, String hostId) {
+        // Sanitize user input to prevent XSS
+        String sanitizedHostName = HtmlUtils.htmlEscape(hostName);
+        String sanitizedHostId = HtmlUtils.htmlEscape(hostId);
+
         String roomCode = generateRoomCode();
         Player host = Player.builder()
-                .id(hostId)
-                .name(hostName)
+                .id(sanitizedHostId)
+                .name(sanitizedHostName)
                 .team(Team.UNASSIGNED)
                 .isHost(true)
                 .build();
@@ -41,9 +46,13 @@ public class GameManager {
         if (room == null) throw new RuntimeException("Room not found");
         if (room.getState() != GameState.LOBBY) throw new RuntimeException("Game already started");
 
+        // Sanitize user input to prevent XSS
+        String sanitizedPlayerName = HtmlUtils.htmlEscape(playerName);
+        String sanitizedPlayerId = HtmlUtils.htmlEscape(playerId);
+
         Player player = Player.builder()
-                .id(playerId)
-                .name(playerName)
+                .id(sanitizedPlayerId)
+                .name(sanitizedPlayerName)
                 .team(Team.UNASSIGNED)
                 .isHost(false)
                 .build();
