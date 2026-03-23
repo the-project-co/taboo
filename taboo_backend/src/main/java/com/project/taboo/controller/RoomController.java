@@ -10,7 +10,7 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/rooms")
 @RequiredArgsConstructor
-@CrossOrigin(origins = "*")
+@CrossOrigin(origins = "${app.allowed-origins}")
 public class RoomController {
     private final GameManager gameManager;
 
