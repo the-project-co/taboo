@@ -4,6 +4,7 @@ import com.project.taboo.model.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.web.util.HtmlUtils;
 
 import java.util.*;
 import java.util.concurrent.*;
@@ -18,9 +19,10 @@ public class GameManager {
 
     public GameRoom createRoom(String hostName, String hostId) {
         String roomCode = generateRoomCode();
+        // Sanitize input to prevent Stored XSS via WebSocket broadcasts
         Player host = Player.builder()
-                .id(hostId)
-                .name(hostName)
+                .id(HtmlUtils.htmlEscape(hostId != null ? hostId : ""))
+                .name(HtmlUtils.htmlEscape(hostName != null ? hostName : ""))
                 .team(Team.UNASSIGNED)
                 .isHost(true)
                 .build();
@@ -41,9 +43,10 @@ public class GameManager {
         if (room == null) throw new RuntimeException("Room not found");
         if (room.getState() != GameState.LOBBY) throw new RuntimeException("Game already started");
 
+        // Sanitize input to prevent Stored XSS via WebSocket broadcasts
         Player player = Player.builder()
-                .id(playerId)
-                .name(playerName)
+                .id(HtmlUtils.htmlEscape(playerId != null ? playerId : ""))
+                .name(HtmlUtils.htmlEscape(playerName != null ? playerName : ""))
                 .team(Team.UNASSIGNED)
                 .isHost(false)
                 .build();

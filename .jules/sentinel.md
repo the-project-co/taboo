@@ -1,0 +1,4 @@
+## 2024-03-27 - Prevent Stored XSS in Real-time WebSocket In-Memory State
+**Vulnerability:** User-provided inputs (`playerName`, `hostName`, `playerId`, `hostId`) were directly stored in the in-memory `GameRoom` concurrent state without sanitization and broadcasted to all connected clients in the room via WebSockets, allowing a Stored Cross-Site Scripting (XSS) attack.
+**Learning:** Real-time applications that rely on shared backend state and WebSocket broadcasts skip the typical HTTP response cycle where frontend frameworks (like React) or security headers might mitigate some XSS risks. Unsanitized data in the shared model state becomes a persistent hazard for any client consuming the WebSocket stream.
+**Prevention:** Sanitize user input immediately upon entry into the shared backend state using utility classes like `org.springframework.web.util.HtmlUtils.htmlEscape()` to ensure that the server-side state always holds safe data before it is broadcast.
