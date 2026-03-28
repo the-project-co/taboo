@@ -1,0 +1,4 @@
+## 2026-03-28 - [Stored XSS via WebSockets Broadcasts]
+**Vulnerability:** User inputs handled by the backend (like player names or IDs) were being directly stored in the shared in-memory state (`GameRoom` via `ConcurrentHashMap`) without sanitization, and then broadcasted back to all clients in the room via WebSockets (`SimpMessagingTemplate.convertAndSend`).
+**Learning:** Even though real-time WebSockets don't use standard REST views, the data broadcasted is often rendered directly into the DOM by the frontend clients. Unsanitized strings in real-time payloads can easily trigger Stored XSS.
+**Prevention:** Always sanitize user inputs at the point of entry before storing them in the shared state. Use existing utilities like `org.springframework.web.util.HtmlUtils.htmlEscape()` to sanitize inputs that are intended to be broadcast.
