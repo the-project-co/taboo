@@ -1,0 +1,4 @@
+## 2024-05-24 - Overly Permissive CORS Configuration
+**Vulnerability:** The Spring Boot application was configured with `origins = "*"` in `@CrossOrigin` annotations and `.setAllowedOriginPatterns("*")` in the WebSocket configuration, allowing arbitrary domains to make requests and initiate WebSocket connections to the application.
+**Learning:** Using wildcard origins defeats Same-Origin Policy and Cross-Origin Resource Sharing protections, making the application vulnerable to CSRF and other cross-origin attacks. Centralized configuration properties provide a secure and easily maintainable approach.
+**Prevention:** Always restrict allowed origins using a dedicated configuration property (e.g., `app.allowed-origins` inside `application.properties`) and inject it using `@Value` and `@CrossOrigin(origins = "${property}")` instead of hardcoding permissive wildcards.
