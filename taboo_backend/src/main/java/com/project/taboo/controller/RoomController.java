@@ -10,7 +10,8 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/rooms")
 @RequiredArgsConstructor
-@CrossOrigin(origins = "*")
+// Sentinel: Restricted CORS origins to properties configuration to prevent unauthorized cross-origin access
+@CrossOrigin(origins = "${app.allowed-origins}")
 public class RoomController {
     private final GameManager gameManager;
 

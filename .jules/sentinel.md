@@ -1,0 +1,7 @@
+## 2024-03-31 - [CORS] Restrict overly permissive CORS origins configuration
+
+**Vulnerability:** The application originally had `@CrossOrigin(origins = "*")` on REST controllers and `.setAllowedOriginPatterns("*")` on WebSocket STOMP endpoints. This overly permissive CORS configuration allows any external origin to make cross-origin requests and read sensitive data, which violates the same-origin policy's protections.
+
+**Learning:** Applications using REST and WebSocket endpoints require explicit and restricted CORS settings. By relying on wildcard origins, malicious websites could execute unauthorized requests (such as CSRF-like attacks) on behalf of authenticated users, especially since WebSockets don't adhere strictly to standard REST CORS protections. The framework does support dynamically injecting values using `@Value("${property}")`, meaning CORS origins can be centralized.
+
+**Prevention:** To prevent unauthorized cross-origin access, always restrict allowed origins to trusted domains. In a Spring Boot backend, configure explicit origins in `application.properties` (e.g., `app.allowed-origins=http://localhost:5173`) and reference this property in `@CrossOrigin(origins = "${app.allowed-origins}")` on controllers and `.setAllowedOrigins(...)` in WebSocket configurations.
