@@ -1,0 +1,8 @@
+{
+  "name": "Remix: Remix: Desi Taboo Party Game",
+  "description": "A real-time multiplayer party spelling-tolerant Taboo / Heads Up game localized for Indian audiences",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
